@@ -10,138 +10,108 @@
 /*
 Possible directions:  
 + Where can variables be added?
-+ Functionalize the band visuals
 + Does each band fragment move independently (using noise)
-+ Can the color change as the amplitude of the band changes
-+ How can this logic be translate into 3D?
++ How can color more closely relate to sound
++ How can this be translated into 3D?
++ User interface elements
 */
 
 
 let mic, fft;
-let ptSz = 12;
-let bands = 128;
+let ptSz;
+let bands = 512; //everything is scaled to fit "512"
+let div = 4;
 
 function setup() {
-  createCanvas(710, 710, WEBGL);
+  createCanvas(900, 900);
   noFill();
 
   mic = new p5.AudioIn();
   mic.start();
-  fft = new p5.FFT(0.9, bands);
+  fft = new p5.FFT(.9, bands);
   fft.setInput(mic);
-  
+  background(45,0, 40);
 }
 
 function draw() {
-  //background(200);
-  fill(255, 2);
-  rect(0, 0, width, height);
-  strokeCap(SQUARE);
 
-  let move = 700 * noise(0.005 * frameCount);
+noStroke();
+//fill(0);
+//stroke(255);
+  rect(0, 0, width, height);
+  let vol = mic.getLevel();
+  let amp = map(vol,0,1, 0, 500);
+  let cs = map (amp, 0, 500, 0 , 200);
+
+
+  ptSz = map (cs, 0, 100, 0, 300);
+
+  let lerpSz = lerp (0, ptSz, .4);
+
+
+  //print(ptSz);
+  
+
+  let move =  noise((0.0005/(vol))* frameCount);
+
   let spectrum = fft.analyze();
 
-  
 
-   for (i = 0; i < )
-  
+push();
+translate (400+move, 400+move);
+let angle = frameCount * 0.01;
+  rotate(-angle);
 
-  beginShape();
-  for (i = 0; i < 31; i += 1) {
-    let p1 = createVector(i, map(spectrum[i], 0, 255, height, 0));
-    let p2 = createVector(spectrum.length - 1, height);
-    let p3 = createVector(p2, (height, 0));
-    let p4 = (p3, i);
-
-    push();
-    stroke(255, 0, 100);
-    strokeWeight(random(ptSz));
-    strokeCap(SQUARE);
-    translate(p1.x+move,p1.y,0);
-    sphere(4);
-    //point(p1.x + move, p1.y);
-    pop();
-
-    endShape();
-  }
-  beginShape();
-  for (i = 32; i < 54; i += 1) {
-    let p1 = createVector(i, map(spectrum[i], 0, 255, height, 0));
-    let p2 = createVector(spectrum.length - 1, height);
-    let p3 = createVector(p2, (height, 0));
-    let p4 = (p3, i);
-
-    //let v1 = p5.Vector.normalize(v0);
-
-    push();
-    stroke(255, 50, 75);
-    strokeWeight(random(ptSz));
-    strokeCap(SQUARE);
-    point(p1.x + move, p1.y);
-    //square(p1.x + move, p1.y, 20);
-    pop();
-
-    endShape();
-  }
-  beginShape();
-  for (i = 61; i < 88; i += 1) {
-    let p1 = createVector(i, map(spectrum[i], 0, 255, height, 0));
-
-    //let v1 = p5.Vector.normalize(v0);
-    //vertex(p1.x, p1.y);
-    push();
-    stroke(240, 100, 50);
-    strokeWeight(random(ptSz));
-    strokeCap(SQUARE);
-    point(p1.x + move, p1.y);
-    pop();
-
-    //vertex(p1.x, p1.y+30);
-    //vertex(p1.x, p1.y+30);
-
-    endShape();
-  }
-
-  beginShape();
-  for (i = 95; i < 127; i += 1) {
-    let p1 = createVector(i, map(spectrum[i], 0, 255, height, 0));
-
-    //let v1 = p5.Vector.normalize(v0);
-    //vertex(p1.x, p1.y);
-    push();
-    stroke(139, 150,250);
-    strokeWeight(random(ptSz));
-    strokeCap(SQUARE);
-    point(p1.x + move, p1.y);
-    point();
-    pop();
-
-    //vertex(width/p1.x, p1.y);
-    //vertex(p1.x, p1.y+30);
-
-    endShape();
-  }
-}
-
-function drawPoints(slice) {
-beginShape();
-for (i = 95; i < 127; i += 1) {
-  let p1 = createVector(i, map(spectrum[i], 0, 255, height, 0));
-
-  //let v1 = p5.Vector.normalize(v0);
-  //vertex(p1.x, p1.y);
+ drawPoints(0, bands/div, 50, 1, 120);
   push();
-  stroke(139, 150,250);
-  strokeWeight(random(ptSz));
-  strokeCap(SQUARE);
-  point(p1.x + move, p1.y);
-  point();
+  
+
+  
+  translate(250,150);
+  rotate(PI);
+  drawPoints(bands/div*3, bands/div*4, 0, 235, 53, 92); //GREEN
   pop();
 
-  //vertex(width/p1.x, p1.y);
-  //vertex(p1.x, p1.y+30);
+  push();
+translate(-25,random(move));
+rotate (PI);
+  drawPoints(bands/div*2, bands/div*3, 0, 235, 213);//BLUE
+  pop();
 
-  endShape();
-}
-}
+  push();
+  translate(0,0);
+  drawPoints(bands/div, bands/div*2, 255,0,0);
+pop();
+
+push()
+translate(0,0);
+ drawPoints(0, 200, 255, 23, 155);
+pop();
+
+  drawPoints(0, 200, 45,0, 40);
+
+  pop();
+  
+  
+  
+
+  function drawPoints(start,end,r,g,b) {
+   
+    beginShape();
+    for (i = start; i < end; i ++) {
+      let p1 = createVector(i, map(spectrum[i], 0, random (150,900), 0,height));
+    
+      //let v1 = p5.Vector.normalize(v0);
+      //vertex(p1.x, p1.y);
+      push();
+      stroke(r,g,b,25);
+      strokeWeight(lerpSz);
+      strokeCap(SQUARE);
+      translate()
+      point(p1.x + move, p1.y);
+      pop();
+      endShape();
+    }
+    }
+  }
 
